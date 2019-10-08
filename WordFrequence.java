@@ -140,6 +140,64 @@ public class WordFrequence {
 		}
 	}
 	
+	/*  第二步   */
+	public static void steptwo(String pathOne,String pathTwo) throws IOException {
+		StringBuffer fileOne=readFile(pathOne);
+		StringBuffer fileTwo=readFile(pathTwo);
+		StringBuffer sb1=new StringBuffer();
+		StringBuffer sb2=new StringBuffer();
+		for(int i=0;i<fileOne.length();i++) {
+			char c=fileOne.charAt(i);
+			if(Character.isUpperCase(c)) {
+				sb1.append(Character.toLowerCase(c));
+			}
+			else {
+				sb1.append(c);
+			}
+		}
+		String str1 = sb1.toString().toLowerCase(); 
+		String[] wordsOne=str1.split("[^(a-z0-9)]+");
+		for(int i=0;i<fileTwo.length();i++) {
+			char c=fileTwo.charAt(i);
+			if(Character.isUpperCase(c)) {
+				sb2.append(Character.toLowerCase(c));
+			}
+			else {
+				sb2.append(c);
+			}
+		}
+		String str2 = sb2.toString().toLowerCase(); 
+		String[] wordsTwo=str2.split("[^(a-z0-9)]+");
+		Map<String, Integer> map=new HashMap<String, Integer>();
+		for(int i=0;i<wordsTwo.length;i++) {
+			//System.out.println(wordsTwo[i]);
+			//判断是否是以字母开头
+			if(wordsTwo[i].matches("[a-z]*")) {
+				//跳过停词表
+				int flag=0; //0表示该单词不在停词表中 1表示在
+				for(int j=0;j<wordsOne.length;j++) {
+					if(wordsOne[j].equals(wordsTwo[i])) {
+						//System.out.println(wordsOne[j]);
+						flag=1;
+						break;
+					}
+				}
+				if(flag==0) {
+					if(map.get(wordsTwo[i])==null) {
+						map.put(wordsTwo[i], 1);
+					}
+					else 
+						map.put(wordsTwo[i], map.get(wordsTwo[i])+1);
+				}
+			}
+		}
+		ArrayList<Map.Entry<String, Integer>> list=sortbyValue(map);
+		System.out.println("跳过停词表后各个单词出现的次数如下：");
+		for(int i=0;i<list.size();i++) 
+			System.out.println(list.get(i).getKey()+":"+list.get(i).getValue());
+	}
+	
+	/*  读文件    */
 	public static StringBuffer readFile(String pathname) throws IOException {
 		BufferedReader read = new BufferedReader(new FileReader(pathname));
         String s;
@@ -190,6 +248,11 @@ public class WordFrequence {
         		String pathname=args[1];
         		stepone21(pathname,n);
         	}
+        }
+        else if(args[0].compareTo("-x")==0) {
+        	String pathOne=args[1];
+        	String pathTwo=args[3];
+        	steptwo(pathOne, pathTwo);
         }
 	}
 }
