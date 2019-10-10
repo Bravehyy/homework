@@ -10,7 +10,7 @@ import java.util.Map;
 public class WordFrequence {
 	
 	/*  第0步   */
-	public static void stepzero(StringBuffer file) {
+	public static void stepzero(String file) {
 		//数组count统计26个字母 每个字母出现的次数
       	int count[]=new int[26];
       //数组p统计每个字母出现的频率
@@ -71,30 +71,18 @@ public class WordFrequence {
 	}
 	
 	/*  第一步      */
-	public static void stepone1(StringBuffer file,int n) {
+	public static void stepone1(String file,int n) {
 		//将所有大写字母转换为小写
-		StringBuffer sb=new StringBuffer();
-		for(int i=0;i<file.length();i++) {
-			char c=file.charAt(i);
-			if(Character.isUpperCase(c)) {
-				sb.append(Character.toLowerCase(c));
-			}
-			else {
-				sb.append(c);
-			}
-		}
-		String str = sb.toString().toLowerCase(); 
-		String[] words=str.split("[^(a-z0-9)]+");
+		String[] words=file.split("[^(a-z0-9)]+");
 		Map<String, Integer> map=new HashMap<String, Integer>();
 		for(int i=0;i<words.length;i++) {
 			//判断是否是以字母开头
-			if(words[i].matches("[a-z]*")) {
+			if(words[i].matches("[a-z](.*)")) {
 				if(map.get(words[i])==null) {
 					map.put(words[i], 1);
 				}
-				else {
+				else 
 					map.put(words[i], map.get(words[i])+1);
-				}
 			}
 		}
 		/*  功能1  */
@@ -112,7 +100,7 @@ public class WordFrequence {
 		File myfile=new File(pathname);
 		String[] list=myfile.list();
 		for(String itemName : list){
-			StringBuffer itemFile=readFile(pathname+itemName);
+			String itemFile=readFile(pathname+itemName);
 			System.out.println("---------------------------------------------------------");
 			System.out.println("---------------------------------------------------------");
 	        System.out.println(itemName+"文件中：");
@@ -127,7 +115,7 @@ public class WordFrequence {
 		for(int i=0;i<fileLFiles.length;i++) {
 			if(fileLFiles[i].isFile()) {
 				String fileName=fileLFiles[i].getName();
-				StringBuffer files=readFile(pathname+fileName);
+				String files=readFile(pathname+fileName);
 				System.out.println(fileName+"文件中：");
 				stepone1(files,n);
 			}
@@ -142,37 +130,15 @@ public class WordFrequence {
 	
 	/*  第二步   */
 	public static void steptwo(String pathOne,String pathTwo) throws IOException {
-		StringBuffer fileOne=readFile(pathOne);
-		StringBuffer fileTwo=readFile(pathTwo);
-		StringBuffer sb1=new StringBuffer();
-		StringBuffer sb2=new StringBuffer();
-		for(int i=0;i<fileOne.length();i++) {
-			char c=fileOne.charAt(i);
-			if(Character.isUpperCase(c)) {
-				sb1.append(Character.toLowerCase(c));
-			}
-			else {
-				sb1.append(c);
-			}
-		}
-		String str1 = sb1.toString().toLowerCase(); 
-		String[] wordsOne=str1.split("[^(a-z0-9)]+");
-		for(int i=0;i<fileTwo.length();i++) {
-			char c=fileTwo.charAt(i);
-			if(Character.isUpperCase(c)) {
-				sb2.append(Character.toLowerCase(c));
-			}
-			else {
-				sb2.append(c);
-			}
-		}
-		String str2 = sb2.toString().toLowerCase(); 
-		String[] wordsTwo=str2.split("[^(a-z0-9)]+");
+		String fileOne=readFile(pathOne);
+		String fileTwo=readFile(pathTwo);
+		String[] wordsOne=fileOne.split("[^(a-z0-9)]+");
+		String[] wordsTwo=fileTwo.split("[^(a-z0-9)]+");
 		Map<String, Integer> map=new HashMap<String, Integer>();
 		for(int i=0;i<wordsTwo.length;i++) {
 			//System.out.println(wordsTwo[i]);
 			//判断是否是以字母开头
-			if(wordsTwo[i].matches("[a-z]*")) {
+			if(wordsTwo[i].matches("[a-z](.*)")) {
 				//跳过停词表
 				int flag=0; //0表示该单词不在停词表中 1表示在
 				for(int j=0;j<wordsOne.length;j++) {
@@ -197,8 +163,37 @@ public class WordFrequence {
 			System.out.println(list.get(i).getKey()+":"+list.get(i).getValue());
 	}
 	
+	/*  第三步    */
+	public static void stepthree(String pathname,int number) throws IOException {
+		String file=readFile(pathname);
+		String[] words=file.split("[^(a-z0-9)]+");
+		Map<String, Integer> map=new HashMap<String, Integer>();
+		for(int k=0;k<words.length;k++) {
+			for(int i=k;i<words.length;i=i+number) {
+				//判断组成短语后是否是以字母开头
+				String str="";
+				for(int j=i;j<i+number;j++) {
+					if(j<words.length)   //j值可能越界
+					str=str+words[j]+" ";
+				}
+				if(str.matches("[a-z](.*)")) {
+					if(map.get(str)==null) {
+						map.put(str, 1);
+					}
+					else {
+						map.put(str, map.get(str)+1);
+					}
+				}
+			}
+		}
+		ArrayList<Map.Entry<String, Integer>> list=sortbyValue(map);
+		System.out.println("各个短语出现的次数如下：");
+		for(int i=0;i<list.size();i++) 
+			System.out.println(list.get(i).getKey()+":"+list.get(i).getValue());
+	}
+	
 	/*  读文件    */
-	public static StringBuffer readFile(String pathname) throws IOException {
+	public static String readFile(String pathname) throws IOException {
 		BufferedReader read = new BufferedReader(new FileReader(pathname));
         String s;
         StringBuffer file=new StringBuffer();
@@ -206,53 +201,56 @@ public class WordFrequence {
             file.append(s+'\n');
         }
         read.close();
-        return file;
+        StringBuffer sb=new StringBuffer();
+		for(int i=0;i<file.length();i++) {
+			char c=file.charAt(i);
+			if(Character.isUpperCase(c)) {
+				sb.append(Character.toLowerCase(c));
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		String str = sb.toString().toLowerCase(); 
+        return str;
 	}
 	
 	public static void main(String[] args) throws IOException {	
         if(args[0].compareTo("-c")==0) {
-        	String pathname=args[1];
-        	StringBuffer file=readFile(pathname);
+        	String file=readFile(args[1]);
         	stepzero(file);
         }
-        else if(args[0].compareTo("-f")==0) {
+        if(args[0].compareTo("-f")==0) {
         	if(args[1].compareTo("-n")==0) {
-        		String pathname=args[3];
-            	StringBuffer file=readFile(pathname);
+            	String file=readFile(args[3]);
         		int n = Integer.parseInt(args[2]);
         		stepone1(file,n);
         	}
         	else {
-        		String pathname=args[1];
-        		StringBuffer file=readFile(pathname);
+        		String file=readFile(args[1]);
         		stepone1(file,-1);
         	}
         }
-        else if (args[0].compareTo("-d")==0) {
+        if (args[0].compareTo("-d")==0) {
         	int n=-1;
         	if(args[1].compareTo("-s")!=0&&args[1].compareTo("-n")==0) {
-        		String pathname=args[3];
         		n = Integer.parseInt(args[2]);
-        		stepone21(pathname,n);
+        		stepone21(args[3],n);
         	}
-        	if(args[1].compareTo("-s")==0&&args[2].compareTo("-n")!=0){
-        		String path=args[2];
-        		stepone22(path,n);
-        	}
+        	if(args[1].compareTo("-s")==0&&args[2].compareTo("-n")!=0)
+        		stepone22(args[2],n);
         	if(args[1].compareTo("-s")==0&&args[2].compareTo("-n")==0) {
-        		String path=args[4];
         		n = Integer.parseInt(args[3]);
-        		stepone22(path, n);
+        		stepone22(args[4], n);
         	}
-        	if(args[1].compareTo("-s")!=0&&args[1].compareTo("-n")!=0){
-        		String pathname=args[1];
-        		stepone21(pathname,n);
-        	}
+        	if(args[1].compareTo("-s")!=0&&args[1].compareTo("-n")!=0)
+        		stepone21(args[1],n);
         }
-        else if(args[0].compareTo("-x")==0) {
-        	String pathOne=args[1];
-        	String pathTwo=args[3];
-        	steptwo(pathOne, pathTwo);
+        if(args[0].compareTo("-x")==0) 
+        	steptwo(args[1], args[3]);
+        if(args[0].compareTo("-p")==0) {
+        	int number=Integer.parseInt(args[1]);
+        	stepthree(args[2],number);
         }
 	}
 }
