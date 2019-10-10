@@ -192,6 +192,39 @@ public class WordFrequence {
 			System.out.println(list.get(i).getKey()+":"+list.get(i).getValue());
 	}
 	
+	/*   第四步   */
+	 public static void stepfour(String pathOne,String pathTwo) throws IOException {
+		String fileOne=readFile(pathOne);
+		String fileTwo=readFile(pathTwo);
+		String[] wordsTwo=fileTwo.split("[^(a-z0-9)]+");
+		String[] str=fileOne.split("\n");
+		Map<String, Integer> map=new HashMap<String, Integer>();	
+		for(int i=0;i<wordsTwo.length;i++) {
+			//判断是否是以字母开头
+			if(wordsTwo[i].matches("[a-z](.*)")) {
+				//替换动词
+				for(int k=0;k<str.length;k++) {
+					String[] verbs=str[k].split("[^(a-z)]+");
+					for(int j=1;j<verbs.length;j++) {
+						if(wordsTwo[i].compareTo(verbs[j])==0) {
+							wordsTwo[i]=verbs[0];
+							break;
+						}
+					}
+				}
+				if(map.get(wordsTwo[i])==null) {
+					map.put(wordsTwo[i], 1);
+				}
+				else 
+					map.put(wordsTwo[i], map.get(wordsTwo[i])+1);
+			}
+		}
+		ArrayList<Map.Entry<String, Integer>> list=sortbyValue(map);
+		System.out.println("动词替换后各个单词出现的次数如下：");
+		for(int i=0;i<list.size();i++) 
+			System.out.println(list.get(i).getKey()+":"+list.get(i).getValue());
+	}
+		
 	/*  读文件    */
 	public static String readFile(String pathname) throws IOException {
 		BufferedReader read = new BufferedReader(new FileReader(pathname));
@@ -202,6 +235,7 @@ public class WordFrequence {
         }
         read.close();
         StringBuffer sb=new StringBuffer();
+        //将大写字母转换为小写
 		for(int i=0;i<file.length();i++) {
 			char c=file.charAt(i);
 			if(Character.isUpperCase(c)) {
@@ -251,6 +285,9 @@ public class WordFrequence {
         if(args[0].compareTo("-p")==0) {
         	int number=Integer.parseInt(args[1]);
         	stepthree(args[2],number);
+        }
+        if(args[0].compareTo("-v")==0) {
+        	stepfour(args[1],args[3]);
         }
 	}
 }
